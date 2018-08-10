@@ -21,7 +21,7 @@ UKF::UKF() {
   std_a_ = 1;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 0.5;
+  std_yawdd_ = 1;
 
   //DO NOT MODIFY measurement noise values below these are provided by the sensor manufacturer.
   // Laser measurement noise standard deviation position1 in m
@@ -82,20 +82,10 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
       double rhodot = meas_package.raw_measurements_(2);
 
       x_ << rho * cos(phi), rho * sin(phi), rhodot * cos(phi), rhodot * sin(phi);
-      P_ << std_radr_*std_radr_, 0, 0, 0, 0,
-            0, std_radr_*std_radr_, 0, 0, 0,
-            0, 0, 1, 0, 0,
-            0, 0, 0, std_radphi_, 0,
-            0, 0, 0, 0, std_radphi_;
     }
     else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
       //set the state with the initial location and zero velocity
       x_ << meas_package.raw_measurements_(0), meas_package.raw_measurements_(1), 0, 0, 0;
-      P_ << std_laspx_*std_laspx_, 0, 0, 0, 0,
-            0, std_laspy_*std_laspy_, 0, 0, 0,
-            0, 0, 1, 0, 0,
-            0, 0, 0, 1, 0,
-            0, 0, 0, 0, 1;
     }
 
     time_us_ = meas_package.timestamp_;
@@ -103,11 +93,10 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
     return;
   }
 
-  long dt = (meas_package.timestamp_ - time_us_) / 1000000.0;
+  double dt = (meas_package.timestamp_ - time_us_) / 1000000.0;
   time_us_ = meas_package.timestamp_;
 
   Prediction(dt);
-
 
   // measurement update
   if (meas_package.sensor_type_ == MeasurementPackage::RADAR && use_radar_) {
@@ -314,7 +303,6 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
   //update state mean and covariance matrix
   x_ += K*z_diff;
   P_ -= K*S*K.transpose();
-
 }
 
 /**
@@ -418,7 +406,6 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
   //update state mean and covariance matrix
   x_ += K*z_diff;
   P_ -= K*S*K.transpose();
-
 }
 
 double UKF::NormalizeAngle(double angle) {
