@@ -67,7 +67,6 @@ public:
   ///* Sigma point spreading parameter
   double lambda_;
 
-
   /**
    * Constructor
    */
@@ -90,6 +89,7 @@ public:
    * @param delta_t Time between k and k+1 in s
    */
   void Prediction(double delta_t);
+  void VPrediction(double delta_t);
 
   /**
    * Updates the state and the state covariance matrix using a laser measurement
@@ -102,6 +102,24 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+  /**
+   * Generates sigma points
+   */
+  void GenerateSigmaPoints(double delta_t);
+
+  /**
+   * Predicts mean and covariance
+   */
+  void PredictMeanAndCovariance();
+
+  /**
+   * Normalize angle
+   */
+  double NormalizeAngle(double angle);
+  double NIS_radar_;
+  double NIS_laser_;
+  int num_sigma_points;
 };
 
 #endif /* UKF_H */
